@@ -1,16 +1,11 @@
----
-# cPanel Git deployment hook
-# This file tells cPanel what to run when the repository is deployed via the
-# cPanel Git Version Control interface. It installs dependencies, builds the
-# TypeScript server and the Vite client, then copies the client build into
-# your account's public_html so the site is served from your domain.
-
 deployment:
-  # Use explicit bash -lc commands to ensure cPanel runs the commands in a shell
   tasks:
     - /bin/bash -lc 'echo "[cpanel] setting NODE_ENV=production" && export NODE_ENV=production'
 
     - /bin/bash -lc 'echo "[cpanel] Installing server dependencies (root package.json)" && npm ci'
+
+    # 👇 Fix permissions for node_modules/.bin tools
+    - /bin/bash -lc 'chmod +x node_modules/.bin/*'
 
     - /bin/bash -lc 'echo "[cpanel] Building TypeScript server" && npm run build'
 
@@ -20,5 +15,4 @@ deployment:
 
     - /bin/bash -lc 'echo "[cpanel] Ensuring public_html exists and copying built client files" && mkdir -p "$HOME/public_html" && cp -r client/dist/* "$HOME/public_html/"'
 
-  # Restart any apps that cPanel manages for this repository (if available)
   restart: true
