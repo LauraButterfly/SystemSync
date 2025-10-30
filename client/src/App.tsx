@@ -401,7 +401,8 @@ export default function App() {
                     <Card
                       key={c.id}
                       card={c}
-                      selected={selectedIndices.includes(i)}
+                      // only show selection highlight for the local player's hand
+                      selected={idx === playerIndex && selectedIndices.includes(i)}
                       onSelect={() => { if (idx === playerIndex) handleCardClick(i); }}
                       showFace={idx === playerIndex}
                     />
