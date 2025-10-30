@@ -57,7 +57,12 @@ export default function App() {
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
-    socket.on('gameStarted', applyPayload);
+    const onGameStarted = (payload: any) => {
+      applyPayload(payload);
+      // if a new game is started (host clicked Play again), clear any game-over modal on clients
+      setGameOverPayload(null);
+    };
+    socket.on('gameStarted', onGameStarted);
     socket.on('stateUpdate', applyPayload);
 
     socket.on('cardsDrawn', (payload: any) => {
@@ -98,7 +103,7 @@ export default function App() {
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
-      socket.off('gameStarted', applyPayload);
+  socket.off('gameStarted', onGameStarted);
       socket.off('stateUpdate', applyPayload);
       socket.off('cardsDrawn');
       socket.off('cardsStolen');
@@ -122,7 +127,6 @@ export default function App() {
 
   function createRoom() {
     socket.emit('createRoom', selectedMode, (res: { roomId: string; playerIndex?: number }) => {
-      console.log('createRoom response', res);
       setRoom(res.roomId);
       setPlayerIndex(res.playerIndex ?? 0);
       // reflect the chosen mode in the lobby immediately so the host sees it
@@ -131,9 +135,7 @@ export default function App() {
   }
 
   function joinRoom(roomId: string) {
-    console.log('emitting joinRoom for', roomId);
     socket.emit('joinRoom', roomId, (res: any) => {
-      console.log('joinRoom response', res);
       if (res.ok) {
         setRoom(roomId);
         setPlayerIndex(res.playerIndex ?? null);
@@ -441,8 +443,6 @@ export default function App() {
                     );
                   })}
                 </ul>
-                  {/* show sequences needed to win (from meta if available, otherwise derive from selectedMode) */}
-                  <p style={{ marginTop: 12 }}><strong>Winning condition:</strong> {meta?.sequencesToWin ?? (selectedMode === 'sudden-death' ? 1 : 3)} sequences to win ({meta?.mode ?? modeLabel(selectedMode)})</p>
                   <h3 style={{ marginTop: 12 }}>How a turn works</h3>
                 <p style={{ margin: '6px 0 0 0', lineHeight: 1.4 }}>
                   Turn flow (server-enforced):
@@ -452,6 +452,8 @@ export default function App() {
                   <li><strong>Click to discard:</strong> After the automatic draw you must discard exactly one card by clicking the card in your hand (clicking a card when it is your turn will discard it).</li>
                   <li><strong>Lay sequences:</strong> Once you've discarded, you may lay one or more valid 3-card sequences. Select cards to form sequences and use <em>Lay Sequence</em> to submit them.</li>
                 </ul>
+                {/* show sequences needed to win (from meta if available, otherwise derive from selectedMode) */}
+                <p style={{ marginTop: 12 }}><strong>Winning condition:</strong> {meta?.sequencesToWin ?? (selectedMode === 'sudden-death' ? 1 : 3)} sequences to win ({meta?.mode ?? modeLabel(selectedMode)})</p>
                 <div style={{ marginTop: 12, textAlign: 'right' }}>
                   <button onClick={() => setShowHelp(false)}>Close</button>
                 </div>

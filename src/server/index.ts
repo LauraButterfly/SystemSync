@@ -89,7 +89,9 @@ io.on('connection', socket => {
     const playerCount = Object.keys(room.players).length;
     console.log(`startGame requested by ${socket.id} in room ${roomId} - sockets=${room.sockets.length} players=${playerCount} playersMap=${JSON.stringify(room.players)}`);
     if (playerCount < 2) return cb && cb({ ok: false, reason: 'Need 2 players to start' });
-  room.state = newGame();
+  // start game with smaller hands in sudden-death mode
+  const startingHandSize = room.mode === 'sudden-death' ? 3 : 8;
+  room.state = newGame(undefined, startingHandSize);
     room.drawnThisTurnCount = 0;
     room.discardedThisTurnFor = null;
     // mandatory initial draw for starting player

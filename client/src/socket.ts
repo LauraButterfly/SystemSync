@@ -7,10 +7,10 @@ export const socket: Socket = io(SERVER_URL, {
 	transports: ['websocket', 'polling']
 });
 
-// helpful debug logging for connection issues
-socket.on('connect', () => console.log('socket connected', socket.id, 'to', SERVER_URL));
+// helpful debug logging for connection issues (use debug to avoid noisy console logs in production)
+socket.on('connect', () => console.debug('socket connected', socket.id, 'to', SERVER_URL));
 socket.on('connect_error', (err) => console.error('socket connect_error', err));
 socket.on('error', (err) => console.error('socket error', err));
-socket.on('reconnect_attempt', (n) => console.log('reconnect attempt', n));
+socket.on('reconnect_attempt', (n) => console.debug('reconnect attempt', n));
 
 export default socket;

@@ -80,15 +80,15 @@ export interface GameState {
   currentPlayer: number; // index 0 or 1
 }
 
-export function newGame(seedRandom?: () => number): GameState {
+export function newGame(seedRandom?: () => number, startingHandSize: number = 8): GameState {
   const deck = shuffle(createDeck(), seedRandom);
   const players: PlayerState[] = [
     { id: 'p1', hand: [], sequences: [], blockedRounds: 0, extraTurns: 0 },
     { id: 'p2', hand: [], sequences: [], blockedRounds: 0, extraTurns: 0 }
   ];
 
-  // deal 8 cards each
-  for (let i = 0; i < 8; i++) {
+  // deal startingHandSize cards each
+  for (let i = 0; i < startingHandSize; i++) {
     players[0].hand.push(deck.pop() as Card);
     players[1].hand.push(deck.pop() as Card);
   }
@@ -176,7 +176,11 @@ export function playCard(state: GameState, playerIndex: number, handIndex: numbe
         if (enemy.sequences.length > 0) {
           // remove the last sequence by default or specified index
           const idx = typeof options.seqIndex === 'number' ? options.seqIndex : enemy.sequences.length - 1;
-          enemy.sequences.splice(idx, 1);
+          const removed = enemy.sequences.splice(idx, 1)[0];
+          // move removed sequence cards to the discard pile
+          if (removed && Array.isArray(removed)) {
+            for (const rc of removed) state.discardPile.push(rc);
+          }
         }
       }
       break;
@@ -192,16 +196,13 @@ export function canLaySequenceFromHand(player: PlayerState, indices: number[]): 
   if (indices.length !== 3) return false;
   const cards = indices.map(i => player.hand[i]);
   if (cards.some(c => c === undefined)) return false;
-  // All same color
-  const colors = cards.map(cardColor);
-  if (!(colors[0] === colors[1] && colors[1] === colors[2])) return false;
-  // Obtain numeric ranks (joker wildcard allowed)
-  const nums = cards.map(c => rankToNumber(c.rank));
-  // If any joker present, allow wildcard behavior: treat joker as fitting spot
-  const jokerCount = cards.filter(c => c.rank === 'JOKER').length;
+  // All non-joker cards must share the same color; jokers act as wildcards
   const nonJokers = cards.filter(c => c.rank !== 'JOKER');
-  if (nonJokers.length === 0) return false;
-
+  if (nonJokers.length === 0) return false; // can't be all jokers
+  const nonJokerColors = nonJokers.map(cardColor);
+  if (!nonJokerColors.every(col => col === nonJokerColors[0])) return false;
+  // Obtain numeric ranks (joker wildcard allowed)
+  const jokerCount = cards.filter(c => c.rank === 'JOKER').length;
   const numbers = nonJokers.map(c => rankToNumber(c.rank) as number).sort((a,b)=>a-b);
   // Check if numbers can form consecutive sequence with jokers filling gaps
   // Example: numbers [2,4] with jokerCount 1 -> can be 2,3,4
@@ -244,9 +245,33 @@ export function reorderTopThree(state: GameState, newTopOrderIds: string[]): boo
   return true;
 }
 
-export function checkWin(state: GameState): { winner?: number } {
+/**
+ * Sort a player's hand in-place by color then rank.
+ * Order: red cards (A..K), black cards (A..K), then jokers at the end.
+ */
+export function sortHand(state: GameState, playerIndex: number) {
+  const player = state.players[playerIndex];
+  if (!player) return false;
+  const colorOrder = (c: Color) => c === 'red' ? 0 : c === 'black' ? 1 : 2;
+  player.hand.sort((a, b) => {
+    const ca = cardColor(a);
+    const cb = cardColor(b);
+    const cc = colorOrder(ca) - colorOrder(cb);
+    if (cc !== 0) return cc;
+    const na = rankToNumber(a.rank);
+    const nb = rankToNumber(b.rank);
+    // place jokers (null) at the end
+    if (na === null && nb === null) return 0;
+    if (na === null) return 1;
+    if (nb === null) return -1;
+    return na - nb;
+  });
+  return true;
+}
+
+export function checkWin(state: GameState, sequencesToWin: number = 3): { winner?: number } {
   for (let i = 0; i < state.players.length; i++) {
-    if (state.players[i].sequences.length >= 3) return { winner: i };
+    if (state.players[i].sequences.length >= sequencesToWin) return { winner: i };
   }
   return {};
 }
