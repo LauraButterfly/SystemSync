@@ -80,7 +80,8 @@ export default function MatrixRain({ animated = true }: Props) {
         const text = chars.charAt(Math.floor(Math.random() * chars.length));
         ctx.fillText(text, x, y);
 
-        const step = fontSize * (0.6 + Math.random() * 0.8);
+  // a little bit slower: reduce base and random range so drops move more gently
+  const step = fontSize * (0.45 + Math.random() * 0.6);
         if (y > height && Math.random() > 0.975) {
           drops[i] = 0;
         } else {
