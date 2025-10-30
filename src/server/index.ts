@@ -150,25 +150,37 @@ io.on('connection', socket => {
     }
     // reset drawn flag when a new turn is about to start? handled in endTurn; leave as-is here
     // emit state updates, with masking if needed
-    if (top && top.rank === 'J' && addedIds.length > 0) {
-      // notify room that a steal happened
-      io.to(data.roomId).emit('cardsStolen', { playerIndex: data.playerIndex, count: addedIds.length });
-      // Build a sanitized state for everyone else where stolen card identities in the thief's hand are hidden
-      try {
-        const sanitized = JSON.parse(JSON.stringify(room.state));
-        const thiefHand = sanitized.players[data.playerIndex].hand as any[];
-        for (let i = 0; i < thiefHand.length; i++) {
-          if (addedIds.includes(thiefHand[i].id)) {
-            thiefHand[i] = { id: `HIDDEN-${Math.random().toString(36).slice(2,8).toUpperCase()}`, suit: 'Hidden', rank: '??' };
+    if (top && top.rank === 'J') {
+      // A Jack was played. If any cards were stolen, broadcast a cardsStolen event
+      // and send a sanitized state to other players so stolen card identities are hidden.
+      if (addedIds.length > 0) {
+        // notify room that a steal happened
+        io.to(data.roomId).emit('cardsStolen', { playerIndex: data.playerIndex, count: addedIds.length });
+        // Build a sanitized state for everyone else where stolen card identities in the thief's hand are hidden
+        try {
+          const sanitized = JSON.parse(JSON.stringify(room.state));
+          const thiefHand = sanitized.players[data.playerIndex].hand as any[];
+          for (let i = 0; i < thiefHand.length; i++) {
+            if (addedIds.includes(thiefHand[i].id)) {
+              thiefHand[i] = { id: `HIDDEN-${Math.random().toString(36).slice(2,8).toUpperCase()}`, suit: 'Hidden', rank: '??' };
+            }
           }
+          // send sanitized state to everyone else
+          socket.to(data.roomId).emit('stateUpdate', { state: sanitized, meta: { drawnThisTurnCount: room.drawnThisTurnCount ?? 0, discardedThisTurnFor: room.discardedThisTurnFor ?? null } });
+          // send full state to the acting socket so they see what they stole
+          socket.emit('stateUpdate', fullStatePayload(room));
+        } catch (err) {
+          // fallback: broadcast full state to everyone
+          io.to(data.roomId).emit('stateUpdate', fullStatePayload(room));
         }
-        // send sanitized state to everyone else
-        socket.to(data.roomId).emit('stateUpdate', { state: sanitized, meta: { drawnThisTurnCount: room.drawnThisTurnCount ?? 0, discardedThisTurnFor: room.discardedThisTurnFor ?? null } });
-        // send full state to the acting socket so they see what they stole
-        socket.emit('stateUpdate', fullStatePayload(room));
-  // private notice for the thief (removed — client no longer listens for this)
-      } catch (err) {
-        // fallback: broadcast full state to everyone
+      } else {
+        // No cards were stolen (opponent had none). Notify the acting player privately so
+        // they know the Jack had no effect, and broadcast the full state to everyone.
+        try {
+          socket.emit('stealFailed', { reason: 'Opponent has no cards to steal' });
+        } catch (err) {
+          // ignore
+        }
         io.to(data.roomId).emit('stateUpdate', fullStatePayload(room));
       }
     } else {

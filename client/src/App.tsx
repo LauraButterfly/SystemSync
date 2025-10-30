@@ -30,6 +30,7 @@ export default function App() {
   const [meta, setMeta] = useState<any>(null);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
   const [peekTopCards, setPeekTopCards] = useState<any[] | null>(null);
   const [jokerModalInfo, setJokerModalInfo] = useState<{ handIndex: number } | null>(null);
   const [showLogs, setShowLogs] = useState<boolean>(false);
@@ -50,6 +51,12 @@ export default function App() {
       if (!msg) return;
       setNotice(msg);
       setTimeout(() => setNotice(null), 3000);
+    };
+
+    const showErrorNotice = (msg?: string) => {
+      if (!msg) return;
+      setErrorNotice(msg);
+      setTimeout(() => setErrorNotice(null), 3200);
     };
 
     const onConnect = () => setConnected(true);
@@ -75,6 +82,13 @@ export default function App() {
       if (payload && typeof payload.count === 'number') {
         showTimedNotice(`Hacker ${payload.playerIndex !== undefined ? payload.playerIndex + 1 : payload.playerIndex} stole ${payload.count} card(s)`);
       }
+    });
+
+    // When a Jack is played but opponent has no cards, the server emits a private 'stealFailed' event
+    socket.on('stealFailed', (payload: any) => {
+      const msg = payload && payload.reason ? payload.reason : 'Steal failed: opponent has no cards';
+      // show as an error-style toast
+      showErrorNotice(msg);
     });
 
     socket.on('hackNotice', (payload: any) => {
@@ -107,6 +121,7 @@ export default function App() {
       socket.off('stateUpdate', applyPayload);
       socket.off('cardsDrawn');
       socket.off('cardsStolen');
+  socket.off('stealFailed');
       socket.off('hackNotice');
       socket.off('gotHacked');
       socket.off('extraTurnGranted');
@@ -375,6 +390,7 @@ export default function App() {
             </div>
           )}
           {notice && <div className="notice">{notice}</div>}
+          {errorNotice && <div className="notice error">{errorNotice}</div>}
           <h2>Current Hacker: {state.currentPlayer + 1}</h2>
           <div className="players">
             {state.players.map((p, idx) => (

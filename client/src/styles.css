@@ -330,6 +330,23 @@ h1,h2,h3,h4 { font-family: 'Inconsolata', monospace; letter-spacing: 1px; color:
 
 .notice { background: linear-gradient(90deg,#062a20,#0b2b20); border: 1px solid rgba(57,255,154,0.12); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; text-align:center; color:#cfeee0 }
 
+/* Error-style toast (used for failed steals and other important errors) */
+.notice.error {
+	position: fixed;
+	top: 14px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: linear-gradient(90deg,#4b0d0d,#6b0f0f);
+	border: 1px solid rgba(255,100,100,0.22);
+	color: #ffecec;
+	padding: 10px 14px;
+	z-index: 99999;
+	box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+	border-radius: 8px;
+	min-width: 260px;
+	text-align: center;
+}
+
 /* Modal for reordering top-3 cards */
 .modal-backdrop {
 	position: fixed;
