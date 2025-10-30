@@ -6,25 +6,19 @@
 # your account's public_html so the site is served from your domain.
 
 deployment:
+  # Use explicit bash -lc commands to ensure cPanel runs the commands in a shell
   tasks:
-    - echo "[cpanel] export NODE_ENV=production"
-    - export NODE_ENV=production
+    - /bin/bash -lc 'echo "[cpanel] setting NODE_ENV=production" && export NODE_ENV=production'
 
-    - echo "[cpanel] Installing server dependencies (root package.json)"
-    - npm ci
+    - /bin/bash -lc 'echo "[cpanel] Installing server dependencies (root package.json)" && npm ci'
 
-    - echo "[cpanel] Building TypeScript server"
-    - npm run build
+    - /bin/bash -lc 'echo "[cpanel] Building TypeScript server" && npm run build'
 
-    - echo "[cpanel] Installing client dependencies"
-    - npm --prefix client ci
+    - /bin/bash -lc 'echo "[cpanel] Installing client dependencies" && cd client && npm ci'
 
-    - echo "[cpanel] Building client (Vite)"
-    - npm --prefix client run build
+    - /bin/bash -lc 'echo "[cpanel] Building client (Vite)" && cd client && npm run build'
 
-    - echo "[cpanel] Ensuring public_html exists and copying built client files"
-    - mkdir -p $HOME/public_html
-    - cp -r client/dist/* $HOME/public_html/
+    - /bin/bash -lc 'echo "[cpanel] Ensuring public_html exists and copying built client files" && mkdir -p "$HOME/public_html" && cp -r client/dist/* "$HOME/public_html/"'
 
   # Restart any apps that cPanel manages for this repository (if available)
   restart: true
