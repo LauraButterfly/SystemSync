@@ -442,7 +442,7 @@ export default function App() {
             <button onClick={laySequence} disabled={!(meta && playerIndex !== null && meta.discardedThisTurnFor === playerIndex)}>Lay Sequence (selected)</button>
             {playerIndex !== null && state.currentPlayer === playerIndex && (
               <>
-                <button style={{ marginLeft: 12 }} disabled={!(meta && meta.discardedThisTurnFor === playerIndex)} onClick={() => { socket.emit('endTurn', room, (res: any) => { if (!res.ok) alert('End turn failed: '+res.reason); }); }}>End Turn</button>
+                <button style={{ marginLeft: 12 }} disabled={!(meta && meta.discardedThisTurnFor === playerIndex)} onClick={() => { socket.emit('endTurn', room, (res: any) => { if (!res.ok) alert('End turn failed: '+res.reason); }); }}>PING (End Turn)</button>
               </>
             )}
           </div>
