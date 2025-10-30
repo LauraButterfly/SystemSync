@@ -1,0 +1,507 @@
+.app { max-width: 1280px; margin: 0 auto; }
+/* Dark hacker theme */
+body {
+	font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+	padding: 12px 24px;
+	/* slightly lighter background for better contrast */
+	background: #0b2a36; /* lighter near-black teal */
+	color: #d6f8e6; /* pale green */
+	-webkit-font-smoothing: antialiased;
+}
+
+a { color: #7ef0a3 }
+
+.app { max-width: 1280px; margin: 0 auto; }
+.players { display:flex; gap:16px; }
+.player { border: 1px solid rgba(255,255,255,0.06); padding: 14px; flex: 1; background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.008)); border-radius: 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 6px 18px rgba(0,0,0,0.45); transition: background .12s ease, box-shadow .12s ease; }
+.hand { display:flex; gap:8px; flex-wrap:wrap; padding-bottom:8px }
+.hand::-webkit-scrollbar { height: 8px }
+.hand::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 6px }
+.hand .card { flex: 0 0 auto }
+.hand button { padding:6px; background: transparent; border: 1px solid rgba(255,255,255,0.04); color: #cfefd6; border-radius:6px }
+.hand button.selected { outline:2px solid #39ff9a }
+
+/* Global button styles - rounded, colored, and accessible */
+button {
+	border-radius: 10px;
+	padding: 8px 12px;
+	background: rgba(57,255,154,0.06);
+	color: #d6f8e6;
+	border: 1px solid rgba(57,255,154,0.14);
+	cursor: pointer;
+	transition: background .12s ease, transform .08s ease, box-shadow .12s ease;
+}
+/* Hover/active effects applied only to intended button groups to avoid clobbering positioned controls */
+button:hover:not(:disabled) {
+	background: rgba(57,255,154,0.12);
+}
+button:active:not(:disabled) {
+	transform: translateY(0);
+}
+button:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+/* Primary action buttons (in controls) - brighter gradient */
+.controls button {
+	background: linear-gradient(90deg,#39ff9a,#5be7ff);
+	color: #051016;
+	border: none;
+	font-weight: 600;
+	padding: 8px 14px;
+	transition: transform .08s ease, box-shadow .12s ease;
+}
+.controls button:hover:not(:disabled) {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 20px rgba(59,255,160,0.08);
+}
+.controls button:active:not(:disabled) {
+	transform: translateY(0);
+}
+.controls button:disabled {
+	background: rgba(255,255,255,0.06);
+	color: rgba(215,235,220,0.6);
+	border: 1px solid rgba(255,255,255,0.03);
+}
+.card {
+	width: 86px;
+	height: 120px;
+	border-radius: 8px;
+	box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+	background: linear-gradient(180deg,#0b1116 0%, #071018 100%);
+	border: 1px solid rgba(255,255,255,0.04);
+	position: relative;
+	padding: 6px;
+	display: inline-block;
+	cursor: default; /* default by default; show pointer only when interactive (not .back) */
+	user-select: none;
+	transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+	font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+/* Mode select (Standard / Sudden Death) themed styling */
+#mode-select {
+	background: linear-gradient(180deg, rgba(3,8,10,0.85), rgba(6,16,18,0.95));
+	color: var(--muted);
+	border: 1px solid rgba(91,231,255,0.12);
+	padding: 6px 28px 6px 10px;
+	border-radius: 8px;
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'><path fill='%235be7ff' d='M7 10l5 5 5-5z'/></svg>");
+	background-repeat: no-repeat;
+	background-position: right 8px center;
+	box-shadow: inset 0 -1px 0 rgba(255,255,255,0.02);
+	transition: box-shadow .12s ease, border-color .12s ease, transform .08s ease;
+}
+#mode-select:focus {
+	outline: none;
+	border-color: var(--neon-cyan);
+	box-shadow: 0 6px 20px rgba(91,231,255,0.06);
+}
+#mode-select option { background: linear-gradient(180deg,#071018,#041018); color: var(--muted); }
+
+/* label next to mode select: subtle terminal style */
+label[for="mode-select"] { font-family: 'Inconsolata', monospace; color: var(--neon-cyan); margin-right: 6px }
+
+/* mode-select wrapper: align items and match select/button sizing */
+.mode-select { display: flex; gap: 8px; align-items: center }
+
+/* Make the select visually match the buttons */
+#mode-select {
+	min-height: 36px;
+	line-height: 1;
+	padding: 6px 34px 6px 10px;
+	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	font-size: 14px;
+}
+
+/* slightly larger arrow and softer border */
+#mode-select { border-radius: 10px; }
+
+/* Make Create Room button same height as select and give it a tighter appearance */
+.mode-select > button { height: 36px; padding: 6px 12px; border-radius: 10px }
+
+/* subtle hover for the select (works in supported browsers) */
+#mode-select:hover { box-shadow: 0 8px 20px rgba(91,231,255,0.03) }
+
+/* Make the option list legible in native menus (best-effort) */
+#mode-select option { padding: 6px 8px }
+
+/* Force darker option backgrounds where browsers allow it; use !important to increase likelihood of applying
+	 Note: some OS-native dropdowns ignore styling; if that happens we'll replace the native select with a custom menu. */
+#mode-select, #mode-select option {
+	background: linear-gradient(180deg,#071018,#041018) !important;
+	color: var(--muted) !important;
+}
+#mode-select option:hover, #mode-select option:focus {
+	background: linear-gradient(180deg,#0b2a2e,#052428) !important;
+	color: var(--muted) !important;
+}
+
+/* remove native expand in IE/Edge and rely on our SVG arrow */
+#mode-select::-ms-expand { display: none; }
+
+/* Custom select styles */
+.custom-select { position: relative; display: flex; align-items: center }
+.custom-select-button {
+	display: inline-flex; align-items: center; gap: 8px;
+	background: linear-gradient(180deg, rgba(3,8,10,0.85), rgba(6,16,18,0.95));
+	color: var(--muted);
+	border: 1px solid rgba(91,231,255,0.12);
+	padding: 6px 12px;
+	min-height: 36px;
+	border-radius: 10px;
+	cursor: pointer;
+}
+.custom-select-button:focus { outline: none; box-shadow: 0 8px 20px rgba(91,231,255,0.06); }
+.custom-select-caret { opacity: 0.9; margin-left: 6px }
+.custom-select-list {
+	position: absolute; left: 0; top: calc(100% + 8px);
+	min-width: 220px; background: linear-gradient(180deg,#071018,#041018);
+	border: 1px solid rgba(255,255,255,0.04); border-radius: 8px;
+	box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 1200;
+	list-style: none; margin: 0; padding: 6px 0;
+}
+.custom-select-item { padding: 8px 12px; cursor: pointer; color: var(--muted); }
+.custom-select-item.highlighted, .custom-select-item:hover { background: rgba(91,231,255,0.06); }
+.custom-select-item.selected { font-weight: 700; color: var(--neon-cyan); }
+
+
+/* expose a face wrapper; keep it non-positioned so absolute corners are positioned against the .card element */
+.card-face { position: static; z-index: auto }
+/* Joker-specific styles removed to restore original card appearance */
+
+
+.card:not(.back) {
+	cursor: pointer;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.25); }
+.card.selected { outline: 3px solid #39ff9a; transform: translateY(-6px); border-color: #39ff9a }
+.card-corner { position: absolute; width: 28px; height: 36px; font-size: 12px; display:flex; flex-direction:column; align-items:flex-start; }
+.card-corner.top-left { left: 6px; top: 6px; }
+.card-corner.bottom-right { right: 6px; bottom: 6px; transform: rotate(180deg); }
+
+.rank { font-weight: 700; color: #dfffe6 }
+.suit { font-size: 14px; color: #bfeed1 }
+.card-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 34px; opacity: 0.95; color: #9fffc9 }
+.play-btn {
+	position: absolute;
+	bottom: 6px;
+	left: 50%;
+	/* ensure horizontal centering baseline is always present so hover doesn't shift it */
+	transform: translateX(-50%);
+	padding: 6px 10px;
+	font-size: 12px;
+	border-radius: 6px;
+	border: none;
+	background: #39ff9a;
+	color: #051016;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 64px;
+	box-sizing: border-box;
+	z-index: 80;
+	pointer-events: auto;
+	transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+
+/* Ensure the play button keeps its horizontal centering when hovered (global button hover adds a transform) */
+.play-btn:hover {
+	transform: translateX(-50%) translateY(-1px);
+}
+.play-btn:active {
+	transform: translateX(-50%) translateY(0);
+}
+
+/* Tooltip for special cards */
+.card-tooltip {
+	position: absolute;
+	left: 50%;
+	bottom: 110%;
+	transform: translateX(-50%);
+	/* lighter, readable tooltip for clarity */
+	background: #e9fff6; /* very light mint */
+	border: 1px solid rgba(91,231,255,0.28);
+	color: #052016; /* dark text for contrast */
+	padding: 6px 8px;
+	border-radius: 6px;
+	font-size: 12px;
+	white-space: nowrap;
+	box-shadow: 0 8px 26px rgba(2,10,12,0.45);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.12s ease, transform 0.12s ease;
+	z-index: 60;
+}
+.card:hover .card-tooltip { opacity: 1; transform: translateX(-50%) translateY(-6px); pointer-events: auto }
+
+/* subtle paper texture using radial gradients */
+.card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: 8px;
+	background-image: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 40%), repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0 1px, transparent 1px 3px);
+	pointer-events: none;
+}
+
+/* back face */
+.card.back {
+	background: linear-gradient(180deg,#052426 0%, #03302b 100%);
+	background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 6px);
+	color: #cfeed6;
+}
+.card.back .card-center { display: none }
+.card.back .card-corner { display: none }
+.card-back-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 18px; opacity: 0.9; color: #fff }
+.back-pattern { letter-spacing: 6px; opacity: 0.95 }
+
+.sequences { margin-top:8px }
+/* slightly lighter panel for sequences area so hands + sequences read as a group */
+.sequences {
+    margin-top: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.004));
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.02);
+}
+.controls { margin-top:12px }
+
+/* Sticky control bar pinned at the bottom so actions are always visible */
+:root { --controls-height: 78px }
+.board { padding-bottom: calc(var(--controls-height) + 16px) }
+.controls {
+	position: fixed;
+	left: 50%;
+	transform: translateX(-50%);
+	bottom: 12px;
+	z-index: 1500;
+	background: linear-gradient(90deg, rgba(3,18,20,0.85), rgba(3,18,20,0.85));
+	padding: 10px 14px;
+	border-radius: 12px;
+	box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+	border: 1px solid rgba(255,255,255,0.03);
+	display: flex;
+	gap: 8px;
+}
+.controls button { min-width: 140px }
+
+/* On very narrow screens, make controls full-width at the bottom */
+@media (max-width: 520px) {
+	.controls { left: 12px; right: 12px; transform: none; bottom: 12px; }
+	.controls button { flex: 1; min-width: 0 }
+}
+.debug { background:#051018; padding:8px; max-height:300px; overflow:auto; border:1px solid rgba(255,255,255,0.03); color:#bfeed1; font-family: monospace; font-size:12px }
+
+/* Theme variables for hacker / matrix vibe */
+:root{
+	--bg-ink: #051016;
+	--bg-panel: #072026;
+	--neon-green: #39ff9a;
+	--neon-cyan:  #5be7ff;
+	--neon-purple:#b26bff;
+	--muted: #d6f8e6;
+	--glass-alpha: 0.06;
+	--card-shadow: 0 8px 26px rgba(0,0,0,0.6);
+	--scanline-opacity: 0.06;
+}
+
+/* Fonts: headings in Inconsolata (terminal feel), UI in Inter */
+body, button, input, select, textarea { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+h1,h2,h3,h4 { font-family: 'Inconsolata', monospace; letter-spacing: 1px; color: var(--neon-cyan); }
+
+/* Background effects removed per user preference; headings still use terminal font */
+
+.center-area { display:flex; gap:24px; align-items:center; justify-content:center; margin:18px 0 }
+.deck { width:120px; height:160px; display:flex; flex-direction:column; align-items:center; }
+.deck-stack { width:86px; height:120px; border-radius:8px; background:linear-gradient(180deg,#071b2a,#05202b); box-shadow:0 10px 24px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03); }
+.deck-count { margin-top:6px; font-weight:700; color:#9fffc9 }
+.discard { width:120px; height:160px; display:flex; flex-direction:column; align-items:center }
+.empty-discard { width:86px; height:120px; border-radius:8px; border:2px dashed rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; color:#7fbf9a }
+.discard-count { margin-top:6px; font-weight:700; color:#9fffc9 }
+.discard .card { transform: rotate(-6deg); box-shadow: 0 12px 28px rgba(0,0,0,0.7); z-index: 3 }
+.discard .card.back { transform: rotate(-6deg) scale(1.02); }
+.discard .card + .card { margin-left: -48px }
+
+.notice { background: linear-gradient(90deg,#062a20,#0b2b20); border: 1px solid rgba(57,255,154,0.12); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; text-align:center; color:#cfeee0 }
+
+/* Modal for reordering top-3 cards */
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+}
+.modal {
+	background: linear-gradient(180deg,#071018,#071018);
+	padding: 16px;
+	border-radius: 8px;
+	width: min(640px, 92%);
+	box-shadow: 0 30px 60px rgba(0,0,0,0.75);
+	border: 1px solid rgba(255,255,255,0.03);
+}
+.modal h3 { margin: 0 0 6px 0; color:#d6f8e6 }
+.modal .muted { color:#6fae90; margin:0 0 12px 0 }
+.modal-cards { display:flex; gap:12px; justify-content:center; align-items:flex-end }
+.modal-card-wrapper { width: 96px; height: 136px; display:flex; align-items:center; justify-content:center }
+.modal-card-wrapper .card { width:86px; height:120px }
+.modal-card-wrapper.drag-over { outline: 3px dashed #09a; }
+
+.sequence-list { display:flex; flex-direction:column; gap:8px }
+.sequence-list .card { width: 60px; height: 86px }
+
+/* Game over modal (compact center modal) */
+.game-over-modal {
+	background: linear-gradient(180deg,#06121a,#041018);
+	color: #d6f8e6;
+	padding: 20px 22px;
+	border-radius: 10px;
+	min-width: 300px;
+	max-width: 420px;
+	text-align: center;
+	box-shadow: 0 30px 60px rgba(0,0,0,0.65);
+	border: 1px solid rgba(57,255,154,0.06);
+}
+.game-over-modal h2 { margin: 0 0 8px; color: #9fffc9 }
+.game-over-modal p { margin: 0 0 12px; color: #bfeee0 }
+
+/* Help panel styles */
+.help-panel-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9998;
+}
+.help-panel {
+	/* Dark themed help panel to match the app */
+	background: linear-gradient(180deg,#071018,#041018);
+	color: var(--muted);
+	padding: 16px;
+	border-radius: 10px;
+	width: min(540px, 92%);
+	box-shadow: 0 30px 60px rgba(0,0,0,0.75);
+	border: 1px solid rgba(255,255,255,0.03);
+}
+.help-panel h3 { margin: 0 0 8px 0; color: var(--neon-cyan) }
+
+/* Style buttons inside help panel so they remain visible on dark background */
+.help-panel button {
+	background: linear-gradient(90deg,#39ff9a,#5be7ff);
+	color: #031014;
+	border: none;
+	padding: 8px 12px;
+	border-radius: 8px;
+	font-weight: 700;
+	cursor: pointer;
+}
+.help-panel button:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(59,255,160,0.06); }
+.help-panel ul { margin: 6px 0 0 16px }
+.help-panel li { margin: 6px 0; line-height: 1.3 }
+
+/* Room input control styles */
+.room-control { display:flex; gap:8px; align-items:center; margin-top:4px }
+.room-control .room-input {
+	padding: 8px 10px;
+	border-radius: 8px;
+	border: 1px solid rgba(255,255,255,0.06);
+	background: rgba(255,255,255,0.02);
+	color: #d6f8e6;
+	min-width: 220px;
+	text-transform: uppercase;
+}
+.room-control .room-input::placeholder { color: rgba(214,248,230,0.6) }
+.room-control .room-join-btn { margin-left: 4px }
+.sr-only { position: absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+
+/* copy / paste button base */
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  color: var(--neon-cyan, #5be7ff);
+  transition: background .18s ease, border-color .18s ease, color .18s ease, transform .08s ease;
+}
+
+/* pressed / success state for copy and paste (immediate, no mouse movement required) */
+.copy-btn.copied,
+.copy-btn.pasted,
+.paste-btn.pasted {
+  background: linear-gradient(90deg, rgba(91,231,255,0.12), rgba(178,107,255,0.10));
+  border-color: rgba(178,107,255,0.28);
+  color: #041418;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(178,107,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+/* make the success checkmark light green */
+.copy-btn.copied svg,
+.copy-btn.pasted svg,
+.paste-btn.pasted svg {
+  color: #7ef0a3;       /* light green */
+  stroke: #7ef0a3;
+  fill: #7ef0a3;
+}
+
+/* ensure SVG strokes/fills follow the button color */
+.copy-btn svg,
+.paste-btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+/* keep accessible focus style */
+.copy-btn:focus,
+.paste-btn:focus {
+  outline: 2px solid rgba(91,231,255,0.12);
+  outline-offset: 2px;
+}
+
+/* No Joker-specific styles — Jokers use standard card styles */
+
+/* Matrix rain canvas sits behind the UI */
+.matrix-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.14; /* subtle by default; increase for stronger effect */
+  mix-blend-mode: screen;
+}
+
+/* ensure main app content sits above the canvas */
+.app {
+  position: relative;
+  z-index: 10;
+}
+
+/* Respect reduced motion: hide canvas entirely */
+@media (prefers-reduced-motion: reduce) {
+  .matrix-canvas { display: none !important; }
+}
+
+
+
+
+
