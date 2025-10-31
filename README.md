@@ -54,6 +54,8 @@ npm run dev
 
 Open the browser to the URL printed by the client dev server (commonly `http://localhost:5173`).
 
+To play, open two browser windows with the URL. Pick the mode, create a room in one window, copy the code and join the room with the code in the other window.
+
 
 How to play
 -----------
